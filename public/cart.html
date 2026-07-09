@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wax & Wire — Your crate</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="/index.html"><span class="disc"></span> Wax & Wire</a>
+    <nav class="main-nav">
+      <a href="/index.html">Catalog</a>
+      <a href="/cart.html" class="active">Crate</a>
+    </nav>
+    <div style="flex:1"></div>
+    <div class="header-actions">
+      <span data-auth-area></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="section-head" style="margin-top:48px;">
+    <h2>Your crate</h2>
+    <span class="sub" id="item-count-label"></span>
+  </div>
+</div>
+
+<div class="wrap cart-layout">
+  <div id="cart-items">
+    <div class="loading-row">Checking the crate…</div>
+  </div>
+
+  <div class="summary-card">
+    <h3>Order summary</h3>
+    <div class="summary-row"><span>Subtotal</span><span class="mono" id="sum-subtotal">$0.00</span></div>
+    <div class="summary-row"><span>Shipping</span><span class="mono">Free</span></div>
+    <div class="summary-row total"><span>Total</span><span class="mono" id="sum-total">$0.00</span></div>
+
+    <div id="checkout-area" style="margin-top: 24px;">
+      <div class="form-error" id="checkout-error"></div>
+      <div id="checkout-signed-out">
+        <p style="font-size:13.5px; color: var(--parchment-dim); margin-bottom:16px;">Sign in to check out and track your order.</p>
+        <a class="btn btn-primary btn-block" href="/login.html?next=/cart.html">Sign in to check out</a>
+      </div>
+      <form id="checkout-form" style="display:none;">
+        <div class="form-field">
+          <label for="ship-name">Full name</label>
+          <input type="text" id="ship-name" required />
+        </div>
+        <div class="form-field">
+          <label for="ship-address">Shipping address</label>
+          <textarea id="ship-address" required placeholder="Street, city, postal code, country"></textarea>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="place-order-btn">Place order</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <span class="brand"><span class="disc" style="width:18px;height:18px;"></span> Wax & Wire</span>
+    <span>A small record shop. Est. this afternoon, in code.</span>
+  </div>
+</footer>
+
+<script src="/js/api.js"></script>
+<script src="/js/cart.js"></script>
+</body>
+</html>
