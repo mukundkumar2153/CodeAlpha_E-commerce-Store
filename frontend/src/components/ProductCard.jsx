@@ -24,7 +24,12 @@ const ProductCard = ({ product }) => {
           alt={product.name}
           className="product-card-img"
         />
-        {hasDiscount && <span className="badge-discount">{percentOff}% OFF</span>}
+        {hasDiscount && (
+          <span className="badge-discount">
+            <span className="stamp-percent">{percentOff}%</span>
+            <span className="stamp-label">off</span>
+          </span>
+        )}
         {outOfStock && <span className="badge-outofstock">Sold Out</span>}
         {!outOfStock && lowStock && <span className="badge-lowstock">Only {product.stock} left</span>}
 
