@@ -1,95 +1,108 @@
-# Wax & Wire — Vinyl Record Store
+# CodeAlpha_Ecommerce — Advanced Full Stack E-commerce Store
 
-A full-stack e-commerce project: product catalog, product detail pages, a shopping cart,
-user registration/login, and order processing — with a custom vinyl-record-shop design
-(no generic Bootstrap look).
+CodeAlpha Full Stack Development Internship — **Task 2: Simple E-commerce Store** (built to an advanced spec).
 
-## Stack
+Live demo: *add your deployed link here after hosting*
 
-- **Backend:** Node.js + Express, SQLite (via `better-sqlite3`), JWT auth in an httpOnly
-  cookie, `bcryptjs` for password hashing.
-- **Frontend:** Plain HTML/CSS/JavaScript (no framework/build step needed) — served
-  directly by Express as static files.
-- **Database:** SQLite file (`backend/store.db`), auto-created and seeded with 12 sample
-  products the first time you run the server.
+## Tech Stack
 
-## Project structure
+**Frontend:** React 18 + Vite, React Router v6, Axios, react-hot-toast
+**Backend:** Node.js, Express.js, MongoDB (Mongoose), JWT auth, bcrypt
+**Payments:** Razorpay + Cash on Delivery
+**Auth:** JWT-based, role-based access control (customer / admin)
+
+## Features
+
+### Customer-facing
+- Product catalog with search, category filter, price sort, pagination
+- Product detail pages with image, stock status, and a review system (star ratings)
+- Persistent server-side cart (add / update quantity / remove)
+- Multi-step checkout: shipping address → payment method → Razorpay or COD
+- Razorpay integration with signature verification on the backend (prevents payment spoofing)
+- Order history with live status tracking (pending → processing → shipped → delivered)
+- JWT auth: register, login, persistent sessions
+
+### Admin panel (`/admin`, requires admin role)
+- Dashboard with revenue, order count, product count, pending order stats
+- Full product CRUD (create, edit, delete, feature toggle)
+- Order management: view all orders, update fulfillment status
+
+## Project Structure
 
 ```
-wax-and-wire/
+CodeAlpha_Ecommerce/
 ├── backend/
-│   ├── server.js      # Express app + all API routes
-│   ├── db.js          # SQLite schema (users, products, cart_items, orders, order_items)
-│   ├── seed.js         # Seeds sample products on first run
-│   ├── auth.js         # JWT signing/verification helpers
-│   └── package.json
-└── public/              # Frontend (served as static files by Express)
-    ├── index.html       # Home page + product catalog with search/filter
-    ├── product.html      # Product detail page
-    ├── cart.html          # Cart + checkout form
-    ├── login.html / register.html
-    ├── orders.html        # Order confirmation + order history
-    ├── css/style.css
-    └── js/                # api.js (shared fetch helper) + one script per page
+│   ├── config/db.js            MongoDB connection
+│   ├── models/                 User, Product, Order schemas
+│   ├── middleware/              JWT auth guard, admin guard, error handler
+│   ├── routes/                  auth, products, cart, orders (incl. Razorpay)
+│   ├── seed/seedProducts.js     Seeds 8 sample products + admin account
+│   └── server.js
+└── frontend/
+    └── src/
+        ├── api/axios.js         Axios instance with auth interceptor
+        ├── context/              AuthContext, CartContext
+        ├── components/           Navbar, ProductCard, route guards
+        └── pages/                 Home, ProductDetail, Cart, Checkout, Orders,
+                                    Login, Register, admin/*
 ```
 
-## Setup
+## Local Setup
+
+### 1. Backend
 
 ```bash
 cd backend
 npm install
-npm start
+cp .env.example .env
+# edit .env: set MONGO_URI, JWT_SECRET, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
+npm run seed     # seeds sample products + creates admin@codealpha.tech / admin123
+npm run dev      # starts on http://localhost:5000
 ```
 
-Then open **http://localhost:3000** in your browser. That's it — frontend and backend
-run from the same server and port.
+Get free Razorpay **test mode** keys at https://dashboard.razorpay.com/app/keys — no real money moves in test mode.
 
-The database (`backend/store.db`) is created and seeded automatically the first time
-you start the server. To reset everything, just delete `backend/store.db*` and restart.
+### 2. Frontend
 
-## Features implemented
+```bash
+cd frontend
+npm install
+cp .env.example .env   # VITE_API_URL=http://localhost:5000/api
+npm run dev             # starts on http://localhost:5173
+```
 
-- **Product listings** — home page grid with category filter chips and a search box
-  (matches title or artist), pulled live from `GET /api/products`.
-- **Product details page** — `product.html?id=<id>`, with quantity selector, stock
-  status, and "Add to crate."
-- **Shopping cart** — works for guests (tracked via an anonymous cookie) and for signed-in
-  users; add/update quantity/remove; a guest's cart is automatically merged into their
-  account the moment they log in or register.
-- **User registration/login** — `POST /api/auth/register` and `/api/auth/login`, passwords
-  hashed with bcrypt, session kept in a signed JWT stored in an httpOnly cookie (no
-  client-side token handling needed).
-- **Order processing** — checkout requires sign-in; placing an order snapshots cart items
-  into `orders`/`order_items`, decrements stock, empties the cart, and redirects to an
-  order confirmation + order history page.
-- **Database** — five tables (`users`, `products`, `cart_items`, `orders`, `order_items`)
-  with foreign keys, created automatically via `db.js`.
+### 3. Log in as admin
 
-## API reference
+Use `admin@codealpha.tech` / `admin123` (created by the seed script) to access `/admin`.
 
-| Method | Path                        | Description                          |
-|--------|-----------------------------|---------------------------------------|
-| GET    | /api/products               | List products (`?category=`, `?q=`)  |
-| GET    | /api/products/categories    | Distinct category list                |
-| GET    | /api/products/:id           | Single product                       |
-| POST   | /api/auth/register          | Create account, logs in               |
-| POST   | /api/auth/login             | Sign in                               |
-| POST   | /api/auth/logout            | Sign out                              |
-| GET    | /api/auth/me                | Current session user (or null)        |
-| GET    | /api/cart                   | Current cart (guest or user)          |
-| POST   | /api/cart/items             | Add item `{product_id, quantity}`     |
-| PUT    | /api/cart/items/:id         | Update quantity (0 removes it)        |
-| DELETE | /api/cart/items/:id         | Remove item                          |
-| POST   | /api/orders                 | Place order (requires sign-in)        |
-| GET    | /api/orders                 | Order history (requires sign-in)      |
-| GET    | /api/orders/:id              | Single order (requires sign-in)       |
+## API Overview
 
-## Notes on going to production
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/api/auth/register` | Public | Create account |
+| POST | `/api/auth/login` | Public | Login, returns JWT |
+| GET | `/api/products` | Public | List products (search/filter/sort/paginate) |
+| GET | `/api/products/:slug` | Public | Product detail + reviews |
+| POST | `/api/products/:id/reviews` | User | Add a review |
+| POST | `/api/products` | Admin | Create product |
+| PUT/DELETE | `/api/products/:id` | Admin | Update / delete product |
+| GET/POST/PUT/DELETE | `/api/cart` | User | Manage cart |
+| POST | `/api/orders/razorpay/create` | User | Create Razorpay order |
+| POST | `/api/orders` | User | Place order (verifies Razorpay signature) |
+| GET | `/api/orders/my` | User | Order history |
+| GET | `/api/orders` | Admin | All orders |
+| PUT | `/api/orders/:id/status` | Admin | Update order status |
 
-- Set a real `JWT_SECRET` environment variable (a random one is generated per process
-  start otherwise, which is fine for local dev but means restarting the server logs
-  everyone out).
-- Swap the placeholder "record sleeve" art (CSS gradients + drawn vinyl disc) for real
-  product photography whenever you have it — the `color_a`/`color_b` fields on each
-  product just feed the gradient today.
-- Add HTTPS + `secure: true` on cookies before deploying anywhere public.
+## Deployment Notes
+
+- **Backend:** Render, Railway, or Cyclic (set env vars, `MONGO_URI` from MongoDB Atlas)
+- **Frontend:** Vercel or Netlify (set `VITE_API_URL` to your deployed backend URL)
+- Update `CLIENT_URL` in the backend `.env` to your deployed frontend URL for CORS
+
+## CodeAlpha Submission Checklist
+
+- [ ] Push this repo to GitHub as `CodeAlpha_Ecommerce`
+- [ ] Deploy frontend + backend, add live link to this README
+- [ ] Record a short video walkthrough (catalog → cart → checkout → admin panel)
+- [ ] Post on LinkedIn tagging @CodeAlpha with the video + GitHub link
+- [ ] Submit via the CodeAlpha submission form
